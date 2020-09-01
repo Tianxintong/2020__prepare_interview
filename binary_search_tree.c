@@ -674,7 +674,7 @@ int Is_BST_PostOrder(int* ar, int size)
 /* 二叉树中和为某一个值的路径：
 输入一颗二叉树和一个整数，打印出二叉树中节点值的和为输入整数的所有路径。
 从树的根节点开始往下一直到叶节点的所有经过的节点形成一条路径。 */
-
+/*这个实现好像还是有点问题..*/
 void print_all_path_in_BST_sum_is_n(bstNode* root, int val)
 {
 	stack* st1 = createStack();
@@ -707,10 +707,17 @@ void print_all_path_in_BST_sum_is_n(bstNode* root, int val)
 		{
 			if(p->left->data + cur_sum == val)
 			{
+				/*入栈，打印路径、出栈当前节点  */
 				push(st1, p->left);
-				cur_sum = cur_sum + p->data;
+				cur_sum = cur_sum + p->left->data;
 				showData_from_base_to_top_bstnode(st1, val);
+				p = GetTop(st1);
+				cur_sum -= p->data;
+				pop(st1);
 
+			
+				/*  找寻新的路径入口：*/
+				/*若栈顶元素是父的左孩子：从栈顶开始，当前路径上仅有左孩子的节点出栈，因为肯定不满足条件。到第一个有右孩子的节点，即是新路径的入口*/
 				p  = GetTop(st1);
 				while( !StackIsEmpty(st1) && NULL != p->parent && p->parent->left == p && p->right == NULL )
 				{
@@ -719,31 +726,67 @@ void print_all_path_in_BST_sum_is_n(bstNode* root, int val)
 					p = GetTop(st1);
 				}
 
-				while(!StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
-				{
-					cur_sum -= p->data;
-					pop(st1);
-					p = GetTop(st1);
-				}
-				if(!StackIsEmpty(st1))
-				{
-					cur_sum -= p->data;
-					pop(st1);
-				}
 				right_tag = 1;
+				/*若栈顶元素是父的右孩子：从栈顶开始，当前路径上连续是父的右孩子的节点出栈，因为肯定不满足条件。到第一个是父的左孩子的节点，该元素也要出栈，下一个元素，即是新路径的入口*/
+				if( !StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p )
+				{
+					while(!StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
+					{
+						cur_sum -= p->data;
+						pop(st1);
+						p = GetTop(st1);
+					}
+					if(!StackIsEmpty(st1))
+					{
+						cur_sum -= p->data;
+						pop(st1);
+					}
+				}
 			}
 			else if( p->left->data + cur_sum < val )
 			{
 				cur_sum += p->left->data;
 				push(st1, p->left);
 				right_tag = 0;
+
+				/*若当前入栈元素是叶子节点，则不满足条件，寻找新入口，同上面调整过程*/
+				p = GetTop(st1);
+				if( p->right == NULL && NULL == p->left )
+				{
+					p = GetTop(st1);
+					while( !StackIsEmpty(st1) &&  NULL != p->parent && p->parent->left == p && p->right == NULL)
+					{
+						cur_sum -= p->data;
+						pop(st1);
+						p = GetTop(st1);
+					}
+					right_tag = 1;
+					if( !StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p )
+					{
+						while(!StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
+						{
+							cur_sum -= p->data;
+							pop(st1);
+							p = GetTop(st1);
+						}
+						if(!StackIsEmpty(st1))
+						{
+							cur_sum -= p->data;
+							pop(st1);
+						}
+				
+					}
+				
+				} 
 			}
 			else
 			{
+				/*出栈 栈顶元素，因为栈顶元素的左孩子不满足条件，则右孩子必然不满足条件，故出栈*/
 				p = GetTop(st1);
 				cur_sum = cur_sum - p->data;
 				pop(st1);
 
+				/* 寻找新入口 */
 				p = GetTop(st1);
 				while( !StackIsEmpty(st1) &&  NULL != p->parent && p->parent->left == p && p->right == NULL)
 				{
@@ -761,14 +804,6 @@ void print_all_path_in_BST_sum_is_n(bstNode* root, int val)
 		}
 		else 
 		{
-			
-			while( !StackIsEmpty(st1) &&  (NULL == p->right ) )
-			{
-				cur_sum -= p->data;
-				pop(st1);
-				p = GetTop(st1);
-			}
-
 
 			if(cur_sum + p->right->data == val)
 			{
@@ -828,6 +863,19 @@ void print_all_path_in_BST_sum_is_n(bstNode* root, int val)
 				pop(st1);
 
 				p = GetTop(st1);
+				while( !StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
+				{
+					cur_sum -= p->data;
+					pop(st1);
+					p = GetTop(st1);
+				}
+
+				p = GetTop(st1);
+				if(root == p)
+				{
+					pop(st1);
+					return;
+				}
 				while(!StackIsEmpty(st1) && p->parent != NULL && p == p->parent->left)
 				{
 					cur_sum -= p->data;
@@ -835,8 +883,255 @@ void print_all_path_in_BST_sum_is_n(bstNode* root, int val)
 					p = GetTop(st1);
 				}
 
+
 				right_tag = 1;
 			}
 		}
 	}
 }
+#if 0
+void find_new_entrance(stack* st1, int* cur_sum, int val, int* right_tag)
+{
+	bstNode* p = GetTop(st1);
+				/*  找寻新的路径入口：*/
+				/*若栈顶元素是父的左孩子：从栈顶开始，当前路径上仅有左孩子的节点出栈，因为肯定不满足条件。到第一个有右孩子的节点，即是新路径的入口*/
+				p  = GetTop(st1);
+				while( !StackIsEmpty(st1) && NULL != p->parent && p->parent->left == p && p->right == NULL )
+				{
+					*cur_sum = cur_sum - p->data;
+					pop(st1);
+					p = GetTop(st1);
+				}
+				
+				*right_tag = 1;
+				/*若栈顶元素是父的右孩子：从栈顶开始，当前路径上连续是父的右孩子的节点出栈，因为肯定不满足条件。到第一个是父的左孩子的节点，该元素也要出栈，下一个元素，即是新路径的入口*/
+				if( !StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p )
+				{
+					while(!StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
+					{
+						*cur_sum -= p->data;
+						pop(st1);
+						p = GetTop(st1);
+					}
+					if(!StackIsEmpty(st1))
+					{
+						*cur_sum -= p->data;
+						pop(st1);
+					}
+				}
+}
+void print_all_path_in_BST_sum_is_n_v2(bstNode* root, int val)
+{
+	stack* st1 = createStack();
+	bstNode* p = root;
+	int cur_sum = 0;
+	int right_tag = 0;
+
+	if(NULL == root)
+	{
+		return;
+	}
+
+	if(root->data > val)
+	{
+		return;
+	}
+	if(root->data == val)
+	{
+		printf("%d\n\n", root->data );
+		return;
+	}
+	push(st1, root);
+	cur_sum = root->data;
+
+
+	while( !StackIsEmpty(st1) )
+	{
+		p = GetTop(st1);
+		if( p->left != NULL && right_tag == 0)
+		{
+			if(p->left->data + cur_sum == val)
+			{
+				/*入栈，打印路径、出栈当前节点  */
+				push(st1, p->left);
+				cur_sum = cur_sum + p->left->data;
+				showData_from_base_to_top_bstnode(st1, val);
+				p = GetTop(st1);
+				cur_sum -= p->data;
+				pop(st1);
+
+			
+				/*  找寻新的路径入口：*/
+				/*若栈顶元素是父的左孩子：从栈顶开始，当前路径上仅有左孩子的节点出栈，因为肯定不满足条件。到第一个有右孩子的节点，即是新路径的入口*/
+				p  = GetTop(st1);
+				while( !StackIsEmpty(st1) && NULL != p->parent && p->parent->left == p && p->right == NULL )
+				{
+					cur_sum = cur_sum - p->data;
+					pop(st1);
+					p = GetTop(st1);
+				}
+
+				right_tag = 1;
+				/*若栈顶元素是父的右孩子：从栈顶开始，当前路径上连续是父的右孩子的节点出栈，因为肯定不满足条件。到第一个是父的左孩子的节点，该元素也要出栈，下一个元素，即是新路径的入口*/
+				if( !StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p )
+				{
+					while(!StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
+					{
+						cur_sum -= p->data;
+						pop(st1);
+						p = GetTop(st1);
+					}
+					if(!StackIsEmpty(st1))
+					{
+						cur_sum -= p->data;
+						pop(st1);
+					}
+				}
+			}
+			else if( p->left->data + cur_sum < val )
+			{
+				cur_sum += p->left->data;
+				push(st1, p->left);
+				right_tag = 0;
+
+				/*若当前入栈元素是叶子节点，则不满足条件，寻找新入口，同上面调整过程*/
+				p = GetTop(st1);
+				if( p->right == NULL && NULL == p->left )
+				{
+					p = GetTop(st1);
+					while( !StackIsEmpty(st1) &&  NULL != p->parent && p->parent->left == p && p->right == NULL)
+					{
+						cur_sum -= p->data;
+						pop(st1);
+						p = GetTop(st1);
+					}
+					right_tag = 1;
+					if( !StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p )
+					{
+						while(!StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
+						{
+							cur_sum -= p->data;
+							pop(st1);
+							p = GetTop(st1);
+						}
+						if(!StackIsEmpty(st1))
+						{
+							cur_sum -= p->data;
+							pop(st1);
+						}
+				
+					}
+				
+				} 
+			}
+			else
+			{
+				/*出栈 栈顶元素，因为栈顶元素的左孩子不满足条件，则右孩子必然不满足条件，故出栈*/
+				p = GetTop(st1);
+				cur_sum = cur_sum - p->data;
+				pop(st1);
+
+				/* 寻找新入口 */
+				p = GetTop(st1);
+				while( !StackIsEmpty(st1) &&  NULL != p->parent && p->parent->left == p && p->right == NULL)
+				{
+					cur_sum -= p->data;
+					pop(st1);
+					p = GetTop(st1);
+				}
+				if(!StackIsEmpty(st1))
+				{
+					cur_sum -= p->data;
+					pop(st1);
+				}
+				right_tag = 1;
+			}
+		}
+		else 
+		{
+
+			if(cur_sum + p->right->data == val)
+			{
+				push(st1, p->right );
+				cur_sum += p->right->data;
+				showData_from_base_to_top_bstnode(st1, val);
+			
+				p = GetTop(st1);
+				while( !StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
+				{
+					cur_sum -= p->data;
+					pop(st1);
+					p = GetTop(st1);
+				}
+				if(!StackIsEmpty(st1))
+				{
+					cur_sum -= p->data;
+					pop(st1);
+				}
+
+				right_tag = 1;
+
+			}
+			else if(cur_sum + p->right->data < val )
+			{
+				cur_sum += p->right->data;
+				push(st1, p->right);
+				right_tag = 0;
+
+				p = GetTop(st1);
+				if( p->right == NULL && NULL == p->left )
+				{
+					while( !StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
+					{
+						cur_sum -= p->data;
+						pop(st1);
+						p = GetTop(st1);
+					}
+					if(p->parent == NULL)
+					{
+						pop(st1);
+						return;
+					}
+					cur_sum -= p->data;
+					if(!StackIsEmpty(st1) )
+					{
+						pop(st1);
+					}
+					right_tag = 1;
+				} 
+
+			}
+			else
+			{
+				p = GetTop(st1);
+				cur_sum -= p->data;
+				pop(st1);
+
+				p = GetTop(st1);
+				while( !StackIsEmpty(st1) && NULL != p->parent && p->parent->right == p)
+				{
+					cur_sum -= p->data;
+					pop(st1);
+					p = GetTop(st1);
+				}
+
+				p = GetTop(st1);
+				if(root == p)
+				{
+					pop(st1);
+					return;
+				}
+				while(!StackIsEmpty(st1) && p->parent != NULL && p == p->parent->left)
+				{
+					cur_sum -= p->data;
+					pop(st1);
+					p = GetTop(st1);
+				}
+
+
+				right_tag = 1;
+			}
+		}
+	}
+}
+#endif

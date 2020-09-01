@@ -7,8 +7,116 @@
 #include "complex_list.h"
 #include "binary_search_tree.h"
 
-
 #if 1
+
+int main()
+{
+	bstNode* root = Bst_BuyNode(10);
+	single_list_node* head = NULL, *head_pre = NULL, *head_post = NULL;
+
+	
+	
+	root = Tree_Insert(root, 5);
+	root = Tree_Insert(root, 4);
+	root = Tree_Insert(root, 3);
+	root = Tree_Insert(root, 1);
+	root = Tree_Insert(root, 8);
+	root = Tree_Insert(root, 7);
+	root = Tree_Insert(root, 6);
+	root = Tree_Insert(root, 16);
+
+	root = Tree_Insert(root, 13);
+	root = Tree_Insert(root, 15);
+	root = Tree_Insert(root, 14);
+	root = Tree_Insert(root, 17);
+	root = Tree_Insert(root, 18);
+	root = Tree_Insert(root, 20);
+
+	printf("Inorder:\n");
+	Inorder_Tree_Walk(root);
+	
+	head = Inorder_Tree_Walk_stack(root);
+	SingleList_showdata_bst(head);
+#if 1	
+	print_all_path_in_BST_sum_is_n(root,0);
+	print_all_path_in_BST_sum_is_n(root,10);
+	print_all_path_in_BST_sum_is_n(root,15);
+	print_all_path_in_BST_sum_is_n(root,19);
+	print_all_path_in_BST_sum_is_n(root,22);
+	print_all_path_in_BST_sum_is_n(root,23);
+	print_all_path_in_BST_sum_is_n(root,30);
+	print_all_path_in_BST_sum_is_n(root,36);
+	print_all_path_in_BST_sum_is_n(root,26);
+#endif
+	print_all_path_in_BST_sum_is_n(root,39);
+#if 1
+	print_all_path_in_BST_sum_is_n(root,54);
+	print_all_path_in_BST_sum_is_n(root,68);
+
+
+	
+
+
+	print_all_path_in_BST_sum_is_n(root,43);
+	print_all_path_in_BST_sum_is_n(root,61);
+	print_all_path_in_BST_sum_is_n(root,81);
+
+	print_all_path_in_BST_sum_is_n(root,100);
+	print_all_path_in_BST_sum_is_n(root,40);
+	print_all_path_in_BST_sum_is_n(root,29);
+	print_all_path_in_BST_sum_is_n(root,20);
+	print_all_path_in_BST_sum_is_n(root,60);
+	print_all_path_in_BST_sum_is_n(root,70);
+#endif
+
+	
+}
+
+
+#endif
+#if 0
+
+int main()
+{
+	bstNode* root = Bst_BuyNode(6);
+	single_list_node* head = NULL, *head_pre = NULL, *head_post = NULL;
+	single_list_node* head_level = NULL;
+	
+	
+	root = Tree_Insert(root, 3);
+	root = Tree_Insert(root, 2);
+	root = Tree_Insert(root, 1);
+	root = Tree_Insert(root, 5);
+	root = Tree_Insert(root, 4);
+	root = Tree_Insert(root, 8);
+	root = Tree_Insert(root, 7);
+	root = Tree_Insert(root, 9);
+
+	printf("Inorder:\n");
+	Inorder_Tree_Walk(root);
+
+	head = Inorder_Tree_Walk_stack(root);
+	SingleList_showdata_bst(head);
+#if 1	
+	print_all_path_in_BST_sum_is_n(root,0);
+	print_all_path_in_BST_sum_is_n(root,6);
+	print_all_path_in_BST_sum_is_n(root,9);
+	print_all_path_in_BST_sum_is_n(root,11);
+	print_all_path_in_BST_sum_is_n(root,12);
+	print_all_path_in_BST_sum_is_n(root,14);
+	print_all_path_in_BST_sum_is_n(root,18);
+#endif
+	print_all_path_in_BST_sum_is_n(root,21);
+
+	print_all_path_in_BST_sum_is_n(root,23);
+	print_all_path_in_BST_sum_is_n(root,100);
+
+
+	
+}
+
+#endif
+#if 0
 
 int main()
 {
